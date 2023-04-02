@@ -1,8 +1,10 @@
 import {getGeneratedPosts, saveGeneratedPost} from './firestore'
-import { convertToMp3, generateTTS, htmlToSsml } from './cloud-tts'
+import { concatTTSPieces, convertToMp3, generateTTSLong, generateTTSPiece, htmlToSsml, storeInCloud } from './cloud-tts'
 import { authenticate, getArticlesData, getListOfArticles } from './instapaper-client'
 import * as user from './nickfelker';
 const cheerio = require('cheerio');
+import * as fs from 'fs';
+const { getAudioDurationInSeconds } = require('get-audio-duration');
 
 (async () => {
   const {user_id} = (await authenticate(user.username, user.password))[0]
@@ -19,20 +21,55 @@ const cheerio = require('cheerio');
     // const content = htmlToSsml(a.content)
     const $ = cheerio.load(a.content)
     // console.log($.text())
-    const content = `${a.title}. ${$.text()}. End of article. Thanks for reading.`
-    // const ssml = `<speak>${a.title}<break time="1s"/>${content}</speak>`
+    const text = $.text()
+      .replace(/\t/g, ' ')
+      .replace(/\n/g, ' ')
+      .replace(/\s+/g, ' ')
+    const content = `${text}. End of article. Thanks for reading.`
+    // const ssml = `<speak>${a.title}<break time="1s"/>${$.}</speak>`
+    const contentArray = (() => {
+      const arr = [`${a.title}.`]
+      let c = a.title.length
+      const words = content.split(' ')
+      for (const w of words) {
+        if (c + w.length >= 5000 /* Max */) {
+          arr.push(w)
+          c = w.length + 2
+        } else {
+          arr[arr.length - 1] += ` ${w}`
+          c += w.length + 2
+        }
+      }
+      return arr
+    })()
     try {
       // await generateTTS(ssml, `${a.bookmark_id}.mp3`)
-      // await generateTTS(content, `${user.username}-${a.bookmark_id}`)
-      await generateTTS('Hello world', `${user_id}-${a.bookmark_id}`)
+      // await generateTTSLong(content, `${user.username}-${a.bookmark_id}`)
+      console.log(contentArray)
+      const concats = []
+      for (let i = 0; i < contentArray.length; i++) {
+        const text = contentArray[i]
+        console.log('generate for', text.length)
+        const filename = `${user_id}-${a.bookmark_id}-${i}`
+        await generateTTSPiece(text, filename)
+        concats.push(`${filename}.mp3`)
+      }
+      const finalName = `${user_id}-${a.bookmark_id}.mp3`
+      await concatTTSPieces(concats, `${finalName}`)
       console.log('TTS Generation done... save post')
-      await convertToMp3([`${user_id}-${a.bookmark_id}.wav`])
+      const buffer = fs.readFileSync(finalName)
+      const stats = fs.statSync(finalName)
+      const duration = await getAudioDurationInSeconds(finalName)
+      await storeInCloud(finalName, buffer)
+      // await convertToMp3([`${user_id}-${a.bookmark_id}.wav`])
       await saveGeneratedPost({
         title: a.title,
         bookmarkId: a.bookmark_id.toString(),
-        username: user_id,
+        username: user_id.toString(),
         timestamp: Date.now(),
         url: a.url,
+        fileSize: stats.size,
+        audioLength: duration,
       })
     } catch (e) {
       console.log(a.bookmark_id, a.title)

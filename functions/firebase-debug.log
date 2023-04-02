@@ -1,0 +1,30 @@
+[debug] [2023-04-02T21:36:12.832Z] ----------------------------------------------------------------------
+[debug] [2023-04-02T21:36:12.834Z] Command:       /home/nick/.nvm/versions/node/v14.21.3/bin/node /home/nick/.nvm/versions/node/v14.21.3/bin/firebase deploy --only functions:podcast
+[debug] [2023-04-02T21:36:12.835Z] CLI Version:   11.25.1
+[debug] [2023-04-02T21:36:12.835Z] Platform:      linux
+[debug] [2023-04-02T21:36:12.835Z] Node Version:  v14.21.3
+[debug] [2023-04-02T21:36:12.835Z] Time:          Sun Apr 02 2023 17:36:12 GMT-0400 (Eastern Daylight Time)
+[debug] [2023-04-02T21:36:12.835Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-04-02T21:36:12.912Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-04-02T21:36:12.912Z] > authorizing via signed-in user (handnf@gmail.com)
+[debug] [2023-04-02T21:36:12.912Z] [iam] checking project evening-discourse for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2023-04-02T21:36:12.914Z] > refreshing access token with scopes: []
+[debug] [2023-04-02T21:36:12.915Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2023-04-02T21:36:12.915Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2023-04-02T21:36:13.298Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2023-04-02T21:36:13.299Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2023-04-02T21:36:13.308Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions [none]
+[debug] [2023-04-02T21:36:13.308Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions x-goog-quota-user=projects/evening-discourse
+[debug] [2023-04-02T21:36:13.308Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2023-04-02T21:36:13.594Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions 200
+[debug] [2023-04-02T21:36:13.594Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2023-04-02T21:36:13.595Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/evening-discourse/serviceAccounts/evening-discourse@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2023-04-02T21:36:13.595Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/evening-discourse/serviceAccounts/evening-discourse@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2023-04-02T21:36:13.889Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/evening-discourse/serviceAccounts/evening-discourse@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2023-04-02T21:36:13.890Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/evening-discourse/serviceAccounts/evening-discourse@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'evening-discourse'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build

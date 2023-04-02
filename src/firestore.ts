@@ -15,6 +15,8 @@ interface Posts {
   username: string
   timestamp: number
   url: string
+  fileSize: number
+  audioLength: number
 }
 
 // interface Podcast 

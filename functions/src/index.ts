@@ -16,6 +16,8 @@ interface Posts {
   username: string
   timestamp: number
   url: string
+  fileSize: number
+  audioLength: number
 }
 
 export async function getGeneratedPosts(username: string) {
@@ -65,7 +67,7 @@ export const podcast = functions.https.onRequest(async (req, res) => {
       authors: 'TED',
       audio: {
         url: `https://storage.googleapis.com/evening-discourse.appspot.com/${p.bookmarkId}.mp3`,
-        bytes: 1000, // FIXME
+        bytes: p.fileSize,
         format: 'audio/mpeg'
       },
       description: `${p.title}\n\n${p.url}`,
@@ -73,7 +75,7 @@ export const podcast = functions.https.onRequest(async (req, res) => {
       title: p.title,
       pubDate: new Date(p.timestamp),
       guid: p.bookmarkId,
-      itunesDuration: 1, // FIXME
+      itunesDuration: p.audioLength,
       itunesImage: ipIcon,
       link: p.url,
       itunesAuthor: 'Instapaper via TED',

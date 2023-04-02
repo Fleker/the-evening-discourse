@@ -17,6 +17,7 @@
     "firebase-admin": "^11.5.0",
     "firebase-functions": "^4.2.1",
     "fluent-ffmpeg": "^2.1.2",
+    "get-audio-duration": "^3.1.1",
     "instapaper": "^1.1.0",
     "instapaper-node-sdk": "^2.0.1",
     "typescript": "^5.0.3"

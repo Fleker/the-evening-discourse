@@ -36,6 +36,10 @@ export async function load() {
   // Create a new TextToSpeech client using the access token
 }
 
+const stdClient = new textToSpeech.TextToSpeechClient({
+  credentials,
+});
+
 const client = new textToSpeech.TextToSpeechLongAudioSynthesizeClient({
   credentials,
 });
@@ -73,7 +77,33 @@ async function waitForOp(response: LROperation<google.cloud.texttospeech.v1.ISyn
   })
 }
 
-export async function generateTTS(text: string, outputFile: string) {
+export async function generateTTSPiece(ssml: string, outputFile: string) {
+  // Construct the request
+  const request: google.cloud.texttospeech.v1.ISynthesizeSpeechRequest = {
+    input: {text: ssml}, // TODO
+    // Select the language and SSML voice gender (optional)
+    // voice: {languageCode: 'en-US', /*ssmlGender: 'FEMALE',*/ name: 'en-US-Neural-C'},
+    voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
+    // select the type of audio encoding
+    audioConfig: {audioEncoding: 'MP3'},
+  };
+  console.log(outputFile, request)
+
+  // Performs the text-to-speech request
+  // https://github.com/googleapis/gax-nodejs/blob/main/client-libraries.md#long-running-operations
+  // But `Error when polling for synth completion Error: 3 INVALID_ARGUMENT: Request contains an invalid argument.`
+  const [response] = await stdClient.synthesizeSpeech(request);
+  // Write the binary audio content to a local file
+  try {
+    await fs.writeFileSync(`${outputFile}.mp3`, response.audioContent, 'binary');
+    console.log('tts promise resolved')
+  } catch (e) {
+    // throw e
+  }
+  return 0
+}
+
+export async function generateTTSLong(text: string, outputFile: string) {
   // Construct the request
   const request: google.cloud.texttospeech.v1.ISynthesizeLongAudioRequest = {
     input: {text},
@@ -109,7 +139,7 @@ export async function generateTTS(text: string, outputFile: string) {
   return 0
 }
 
-async function storeInCloud(bucket: Bucket, filename: string, data: Buffer) {
+export async function storeInCloud(filename: string, data: Buffer) {
   const file = bucket.file(filename)
   // https://cloud.google.com/storage/docs/samples/storage-stream-file-upload#storage_stream_file_upload-nodejs
   // Create a pass through stream from a string
@@ -164,10 +194,30 @@ export async function convertToMp3(outputFile: string[]) {
   await tmpDownloadFile(file, tmpFilename)
   await convertWavToMp3(tmpFilename)
   const mp3File = fs.readFileSync(mp3Filename)
-  await storeInCloud(bucket, cloudFilename, mp3File)
+  await storeInCloud(cloudFilename, mp3File)
 }
 
 export function htmlToSsml(html: string) {
   return html
     .replace(/\t/g, '')
+}
+
+export function concatTTSPieces(concats: string[], finalFile: string) {
+  return new Promise((res, rej) => {
+    console.log(`Concat (${concats.length}) - ${concats.join(',')}`)
+    const cmd = ffmpeg()
+    concats.forEach(c => cmd.input(c) )
+    cmd.on('end', () => {
+      res('ok')
+    })
+    .on('error', (err: any) => {
+      console.error(err.message)
+      rej(err.message)
+    })
+    .mergeToFile(finalFile)
+    // Setting ID3 tags
+    // .addOutputOption('-metadata', `title=${episode.title}`)
+    // .addOutputOption('-metadata', `artist=${feed.author}`)
+    // .addOutputOption('-metadata', `album=${feed.title}`)
+  })
 }
