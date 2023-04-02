@@ -1,0 +1,10 @@
+# Our secrets
+src/instapaper-client.ts
+src/nickfelker.ts
+# Others
+lib/
+node_modules/
+package-lock.json
+yarn.lock
+out
+evening-discourse-*.json

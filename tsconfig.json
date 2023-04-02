@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "outDir": "lib",
+    "sourceMap": true,
+    "strict": false,
+    "target": "ES6",
+    "skipLibCheck": true,
+  },
+  "exclude": [
+    "node_modules",
+    "src/__tests__",
+  ],
+  "files": [
+    "node_modules/typescript/lib/lib.es6.d.ts"
+  ],
+  "compileOnSave": true,
+  "include": [
+    "src/*.ts",
+    "src/**/*.ts",
+  ]
+}
