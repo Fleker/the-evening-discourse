@@ -18,6 +18,7 @@ interface Posts {
   url: string
   fileSize: number
   audioLength: number
+  description: string
 }
 
 export async function getGeneratedPosts(username: string) {
@@ -47,15 +48,15 @@ export const podcast = functions.https.onRequest(async (req, res) => {
   if (!posts.length) {
     res.status(404).send('Podcast by this ID does not exist')
   }
-  const ipIcon = `https://staticinstapaper.s3.dualstack.us-west-2.amazonaws.com/img/favicon.png?v=3a43e0f358075f9c79f8e1c10d6e737a`
+  const ipIcon = `https://i.imgur.com/6ARxPBS.png`
   const feed: PodcastFeed2 = {
     icon: ipIcon,
     lastBuildDate: new Date(),
     link: 'https://instapaper.com',
-    title: 'The Evening Discourse',
-    itunesAuthor: 'Instapaper via TED',
+    title: 'Your Evening Discourse',
+    itunesAuthor: 'The Evening Discourse',
     itunesImage: ipIcon,
-    author: 'Instapaper via TED',
+    author: 'The Evening Discourse',
     itunesExplicit: false,
     itunesOwner: {
       email: 'handnf@gmail.com', // FIXME
@@ -64,21 +65,21 @@ export const podcast = functions.https.onRequest(async (req, res) => {
     itunesCategory: {'News': ['Politics', 'News Commentary']},
     language: 'en-us',
     entries: posts.map(p => ({
-      authors: 'TED',
+      authors: 'The Evening Discourse',
       audio: {
-        url: `https://storage.googleapis.com/evening-discourse.appspot.com/${p.bookmarkId}.mp3`,
+        url: `https://storage.googleapis.com/evening-discourse/${p.username}-${p.bookmarkId}.mp3`,
         bytes: p.fileSize,
         format: 'audio/mpeg'
       },
-      description: `${p.title}\n\n${p.url}`,
+      description: `${p.description ?? ''}\n\n${p.url}`,
       // itunesSummary: epi.description,
       title: p.title,
       pubDate: new Date(p.timestamp),
       guid: p.bookmarkId,
       itunesDuration: p.audioLength,
       itunesImage: ipIcon,
-      link: p.url,
-      itunesAuthor: 'Instapaper via TED',
+      link: p.url.replace(/[?&]/g, ''),
+      itunesAuthor: 'The Evening Discourse',
       itunesExplicit: false,
     })),
   }

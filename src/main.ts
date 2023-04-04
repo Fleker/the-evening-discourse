@@ -9,10 +9,10 @@ const { getAudioDurationInSeconds } = require('get-audio-duration');
 (async () => {
   const {user_id} = (await authenticate(user.username, user.password))[0]
   const articles = await getArticlesData()
-  const generatedPosts = await getGeneratedPosts(user_id)
+  const generatedPosts = await getGeneratedPosts(user_id.toString())
   console.log(`Found ${articles.length} articles, ${generatedPosts.length} already processed`)
-  // for await (const a of articles) {
-    const a = articles[0]
+  for await (const a of articles) {
+    // const a = articles[0]
     if (generatedPosts.find(p => p.bookmarkId === a.bookmark_id.toString())) {
       console.log(`Post ${a.title} already generated`)
       // continue
@@ -25,6 +25,8 @@ const { getAudioDurationInSeconds } = require('get-audio-duration');
       .replace(/\t/g, ' ')
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
+      // NYTimes
+      .replace("Send any friend a storyAs a subscriber, you have 10 gift articles to give each month. Anyone can read what you share.", '')
     const content = `${text}. End of article. Thanks for reading.`
     // const ssml = `<speak>${a.title}<break time="1s"/>${$.}</speak>`
     const contentArray = (() => {
@@ -70,6 +72,7 @@ const { getAudioDurationInSeconds } = require('get-audio-duration');
         url: a.url,
         fileSize: stats.size,
         audioLength: duration,
+        description: contentArray[0],
       })
     } catch (e) {
       console.log(a.bookmark_id, a.title)
@@ -77,5 +80,5 @@ const { getAudioDurationInSeconds } = require('get-audio-duration');
       console.log('gt', e)
       // throw e
     }
-  // }
+  }
 })()

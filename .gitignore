@@ -8,3 +8,4 @@ package-lock.json
 yarn.lock
 out
 evening-discourse-*.json
+*.mp3

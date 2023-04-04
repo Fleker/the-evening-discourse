@@ -82,8 +82,7 @@ export async function generateTTSPiece(ssml: string, outputFile: string) {
   const request: google.cloud.texttospeech.v1.ISynthesizeSpeechRequest = {
     input: {text: ssml}, // TODO
     // Select the language and SSML voice gender (optional)
-    // voice: {languageCode: 'en-US', /*ssmlGender: 'FEMALE',*/ name: 'en-US-Neural-C'},
-    voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
+    voice: {languageCode: 'en-US', name: 'en-US-Studio-O'},
     // select the type of audio encoding
     audioConfig: {audioEncoding: 'MP3'},
   };

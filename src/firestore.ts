@@ -17,6 +17,7 @@ interface Posts {
   url: string
   fileSize: number
   audioLength: number
+  description: string
 }
 
 // interface Podcast 
