@@ -1,24 +1,12 @@
-import { initializeApp, applicationDefault, cert } from 'firebase-admin/app';
+import { initializeApp, applicationDefault, cert, ServiceAccount } from 'firebase-admin/app';
 import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
-const serviceAccount = require('../evening-discourse-firebase-adminsdk-d6yqz-2a9bfb7bcd.json');
-
+import serviceAccount from '../functions/src/firebase'
+import {Posts} from '../functions/src/posts'
 initializeApp({
-  credential: cert(serviceAccount)
+  credential: cert(serviceAccount as ServiceAccount)
 });
 
 const db = getFirestore();
-
-interface Posts {
-  // Key: username-bookmark_id
-  title: string
-  bookmarkId: string
-  username: string
-  timestamp: number
-  url: string
-  fileSize: number
-  audioLength: number
-  description: string
-}
 
 // interface Podcast 
 
