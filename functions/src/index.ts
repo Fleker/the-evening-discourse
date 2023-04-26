@@ -15,12 +15,9 @@ import * as fs from 'fs';
 import { Posts } from './posts';
 import { generateTTSPiece, textToArray } from './cloud-tts';
 const { getAudioDurationInSeconds } = require('get-audio-duration');
-import textToSpeech from '@google-cloud/text-to-speech'
-import { google } from '@google-cloud/text-to-speech/build/protos/protos';
 import * as ffmpeg from 'fluent-ffmpeg'
 import {Stream} from 'stream'
 import {File, Bucket} from '@google-cloud/storage'
-import { Article } from './instapaper-client';
 import * as os from 'os'
 import * as path from 'path'
 

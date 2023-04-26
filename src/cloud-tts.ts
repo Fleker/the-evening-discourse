@@ -24,8 +24,10 @@ export function textToArray(article: Article, fullText: string): string[] {
     .replace(/\n/g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/U[.]S[.]/g, 'United States')
-    .replace(/a.m./g, 'A M')
-    .replace(/p.m./g, 'P M')
+    .replace(/a\.m\./g, 'A M')
+    .replace(/p\.m\./g, 'P M')
+    .replace(/IEEE/g, 'I triple E')
+    .replace(/(\d+)\.(\d+)/g, '$1 point $2')
     // Fix close-together punctuation
     .replace(/([.?!"“”])(\w)/g, '$1 $2')
     .replace(/(\w)([.?!"“”])/g, '$1 $2')

@@ -32,14 +32,18 @@ export async function getArticlesData(): Promise<Article[]> {
     console.log(bookmark_id, b.description, b)
     if (bookmark_id === undefined) continue
     if (!title) continue
-    const content = await client.request('/bookmarks/get_text', { bookmark_id: `${bookmark_id}` }, '1.1')
-    // console.log('content', content)
-    out.push({
-      content,
-      bookmark_id,
-      url,
-      title,
-    })
+    try {
+      const content = await client.request('/bookmarks/get_text', { bookmark_id: `${bookmark_id}` }, '1.1')
+      // console.log('content', content)
+      out.push({
+        content,
+        bookmark_id,
+        url,
+        title,
+      })
+    } catch (e) {
+      console.error(`error fetching "${title}": ${e}`)
+    }
   }
   return out
 }
