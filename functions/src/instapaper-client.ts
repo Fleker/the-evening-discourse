@@ -12,7 +12,8 @@ export interface Article {
 
 export async function authenticate(username: string, password: string) {
   client.setCredentials(username, password)
-  return await client.verifyCredentials()
+  const creds = await client.verifyCredentials()
+  return creds[0]
 }
 
 export async function getListOfArticles() {

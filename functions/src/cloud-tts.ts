@@ -17,19 +17,30 @@ export function textToArray(article: Article, fullText: string): string[] {
     .replace(/\t/g, ' ')
     .replace(/\n/g, ' ')
     .replace(/\s+/g, ' ')
-    // NYTimes
-    .replace("Send any friend a storyAs a subscriber, you have 10 gift articles to give each month. Anyone can read what you share.", '')
+    .replace(/U[.]S[.]/g, 'United States')
+    .replace(/a\.m\./g, 'A M')
+    .replace(/p\.m\./g, 'P M')
+    .replace(/IEEE/g, 'I triple E')
+    .replace(/CRISPR/g, 'crisper')
+    .replace(/Colbert/g, 'coal bear')
     // Other fixes
     .replace(/Mr./g, 'Mister')
     .replace(/Ms./g, 'Miss')
     .replace(/Mrs./g, 'Missus')
     // Fix close-together punctuation
-    .replace(/([.?!"“”])(\w)/g, '$1 $2')
-    .replace(/(\w)([.?!"“”])/g, '$1 $2')
+    // .replace(/([.?!"“”])(\w)/g, '$1 $2')
+    // .replace(/(\w)([.?!"“”])/g, '$1 $2')
     .replace(/\s—/g, '. ')
     .replace(/[)],/g, ').')
     .replace(/;/g, '.')
     .replace(/[.,]["“”]/g, '". ')
+    .replace(/\s[.]\s/g, '. ')
+    .replace(/ - /g, '. ')
+    .replace(/—/g, '. ')
+    // NYTimes
+    .replace("Send any friend a storyAs a subscriber, you have 10 gift articles to give each month. Anyone can read what you share.", '')
+    .replace(`Send any friend a storyAs a subscriber, you have 10 gift articles to give each month . Anyone can read what you share .`, '')
+    .replace(/IMAGE:/g, 'Image. ')
 
   console.log('Updated to', text)
   const content = text
@@ -50,13 +61,13 @@ export function textToArray(article: Article, fullText: string): string[] {
   })()
 }
 
-export async function generateTTSPiece(ssml: string, outputFile: string) {
+export async function generateTTSPiece(voice: string, ssml: string, outputFile: string) {
   // Construct the request
   const request: google.cloud.texttospeech.v1.ISynthesizeSpeechRequest = {
     input: {text: ssml}, // TODO
     // Select the language and SSML voice gender (optional)
     // voice: {languageCode: 'en-US', name: 'en-US-Studio-O'},
-    voice: {languageCode: 'en-US', name: 'en-US-Neural2-F'},
+    voice: {languageCode: 'en-US', name: voice},
     // select the type of audio encoding
     audioConfig: {audioEncoding: 'MP3'},
   };
