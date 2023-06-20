@@ -23,7 +23,7 @@ export async function getListOfArticles() {
 export async function getArticlesData(): Promise<Article[]> {
   const bookmarks = await getListOfArticles()
   const out = []
-  console.log(bookmarks)
+  // console.log(bookmarks)
   // let t = 0
   for await (const b of bookmarks) {
     if (b.type !== 'bookmark') continue

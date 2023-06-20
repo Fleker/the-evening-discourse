@@ -72,7 +72,7 @@ function calculateCost(contentSize: number, fileSize: number) {
   // https://cloud.google.com/storage/pricing
   const hosting = 0.00000000002 // $/B/month
   const download = 0.00000000012 // Download/B
-  const serviceSurcharge = 0.03 // To support further development (~$1 at one article/day)
+  const serviceSurcharge = 0.05 // To support further development (~$1 at one article/weekday)
   return (neural2 + std) * contentSize // In case we have to downgrade
     + (hosting * 12 * fileSize) // A year of hosting
     + (download * 2 * fileSize) // Upload & download
@@ -172,14 +172,14 @@ async function convertInstapaperToMp3(uid: string, idInstapaper: string, userRef
       const date = new Date()
       const dateKey = `${(date.getMonth() + 1).toString()}-${date.getFullYear()}`
       const billingAccount = await db.collection('billing').doc(user_id.toString()).get()
+      const ttsCost = calculateCost(a.content.length, hasGenerated.fileSize)
       if (billingAccount.exists) {
         await billingAccount.ref.update({
-          [`history.dateKey`]: {
-            minutes: FieldValue.increment(hasGenerated.audioLength / 60),
-            bytes: FieldValue.increment(a.content.length),
-            posts: FieldValue.increment(1),
-            cost: FieldValue.increment(calculateCost(a.content.length, hasGenerated.fileSize))
-          }
+          [`history.${dateKey}.minutes`]: FieldValue.increment(hasGenerated.audioLength / 60),
+          [`history.${dateKey}.bytes`]: FieldValue.increment(a.content.length),
+          [`history.${dateKey}.posts`]: FieldValue.increment(1),
+          [`history.${dateKey}.fileBytes`]: FieldValue.increment(hasGenerated.fileSize),
+          [`history.${dateKey}.cost`]: FieldValue.increment(ttsCost),
         })
       } else {
         await billingAccount.ref.set({
@@ -188,11 +188,21 @@ async function convertInstapaperToMp3(uid: string, idInstapaper: string, userRef
               minutes: hasGenerated.audioLength / 60,
               bytes: a.content.length,
               posts: 1,
+              fileBytes: hasGenerated.fileSize,
               cost: calculateCost(a.content.length, hasGenerated.fileSize),
             } as Bill
           }
         })
       }
+      // Update current month for /user
+      console.log(`Update userRef.currentMonth`)
+      await userRef.update({
+        [`currentMonth.minutes`]: FieldValue.increment(hasGenerated.audioLength / 60),
+        [`currentMonth.bytes`]: FieldValue.increment(a.content.length),
+        [`currentMonth.posts`]: FieldValue.increment(1),
+        [`currentMonth.fileBytes`]: FieldValue.increment(hasGenerated.fileSize),
+        [`currentMonth.cost`]: FieldValue.increment(ttsCost),
+      })
       continue
     }
 
@@ -273,17 +283,18 @@ async function convertInstapaperToMp3(uid: string, idInstapaper: string, userRef
       const date = new Date()
       const dateKey = `${(date.getMonth() + 1).toString()}-${date.getFullYear()}`
       const billingAccount = await db.collection('billing').doc(user_id.toString()).get()
+      const ttsCost = calculateCost(a.content.length, stats.size)
       if (billingAccount.exists) {
+        console.log(`Update billing for ${user_id}: ${calculateCost(a.content.length, stats.size)}`)
         await billingAccount.ref.update({
-          [`history.${dateKey}`]: {
-            minutes: FieldValue.increment(duration / 60),
-            bytes: FieldValue.increment(a.content.length),
-            posts: FieldValue.increment(1),
-            fileBytes: FieldValue.increment(stats.size),
-            cost: FieldValue.increment(calculateCost(a.content.length, stats.size))
-          }
+          [`history.${dateKey}.minutes`]: FieldValue.increment(duration / 60),
+          [`history.${dateKey}.bytes`]: FieldValue.increment(a.content.length),
+          [`history.${dateKey}.posts`]: FieldValue.increment(1),
+          [`history.${dateKey}.fileBytes`]: FieldValue.increment(stats.size),
+          [`history.${dateKey}.cost`]: FieldValue.increment(ttsCost),
         })
       } else {
+        console.warn(`User ${user_id} has no billing account`)
         await billingAccount.ref.set({
           history: {
             [dateKey]: {
@@ -298,18 +309,17 @@ async function convertInstapaperToMp3(uid: string, idInstapaper: string, userRef
       }
 
       // Update current month for /user
+      console.log(`Update userRef.currentMonth`)
       await userRef.update({
-        currentMonth: {
-          minutes: FieldValue.increment(duration / 60),
-          bytes: FieldValue.increment(a.content.length),
-          posts: FieldValue.increment(1),
-          fileBytes: FieldValue.increment(stats.size),
-          cost: FieldValue.increment(calculateCost(a.content.length, stats.size))
-        }
+        [`currentMonth.minutes`]: FieldValue.increment(duration / 60),
+        [`currentMonth.bytes`]: FieldValue.increment(a.content.length),
+        [`currentMonth.posts`]: FieldValue.increment(1),
+        [`currentMonth.fileBytes`]: FieldValue.increment(stats.size),
+        [`currentMonth.cost`]: FieldValue.increment(ttsCost),
       })
     } catch (e) {
-      console.log(a.bookmark_id, a.title)
-      console.log('Mix Error', e)
+      console.error(a.bookmark_id, a.title)
+      console.error('Mix Error', e)
     }
   }
   return Promise.resolve('0')
