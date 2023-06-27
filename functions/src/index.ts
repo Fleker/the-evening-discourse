@@ -140,189 +140,194 @@ async function convertInstapaperToMp3(uid: string, idInstapaper: string, userRef
 
   const deprecated = await getGeneratedPosts(user_id.toString())
   console.log(`Found ${articles.length} articles, ${deprecated.length} already processed`)
-  for await (const a of articles) {
-    if (Object.keys(generatedPosts.posts).includes(a.bookmark_id.toString())) {
-      console.log(`Post ${a.title} already generated`)
-      continue
-    }
-
-    // FIXME later
-    if (deprecated.find(p => p.bookmarkId === a.bookmark_id.toString())) {
-      console.log(`Post ${a.title} already generated`)
-      continue
-    }
-
-    const hasGenerated = await getExistingTTS(a.url)
-    if (hasGenerated) {
-      // Short-circuit. No need to regen.
-      console.log(`Short-circuit. Recycling TTS for ${a.title}`)
-      await saveGeneratedPost({
-        title: a.title,
-        bookmarkId: a.bookmark_id.toString(),
-        username: user_id.toString(),
-        timestamp: Date.now(),
-        url: a.url,
-        fileSize: hasGenerated.fileSize,
-        audioLength: hasGenerated.audioLength,
-        description: hasGenerated.description,
-        filepath: hasGenerated.cloudStorageTts
-      })
-
-      // Update /billing
-      const date = new Date()
-      const dateKey = `${(date.getMonth() + 1).toString()}-${date.getFullYear()}`
-      const billingAccount = await db.collection('billing').doc(user_id.toString()).get()
-      const ttsCost = calculateCost(a.content.length, hasGenerated.fileSize)
-      if (billingAccount.exists) {
-        await billingAccount.ref.update({
-          [`history.${dateKey}.minutes`]: FieldValue.increment(hasGenerated.audioLength / 60),
-          [`history.${dateKey}.bytes`]: FieldValue.increment(a.content.length),
-          [`history.${dateKey}.posts`]: FieldValue.increment(1),
-          [`history.${dateKey}.fileBytes`]: FieldValue.increment(hasGenerated.fileSize),
-          [`history.${dateKey}.cost`]: FieldValue.increment(ttsCost),
-        })
-      } else {
-        await billingAccount.ref.set({
-          history: {
-            [dateKey]: {
-              minutes: hasGenerated.audioLength / 60,
-              bytes: a.content.length,
-              posts: 1,
-              fileBytes: hasGenerated.fileSize,
-              cost: calculateCost(a.content.length, hasGenerated.fileSize),
-            } as Bill
-          }
-        })
+  const articlePromises = []
+  for (const a of articles) {
+    articlePromises.push(new Promise(async (res, rej) => {
+      if (Object.keys(generatedPosts.posts).includes(a.bookmark_id.toString())) {
+        console.log(`Post ${a.title} already generated`)
+        return res('1');
       }
-      // Update current month for /user
-      console.log(`Update userRef.currentMonth`)
-      await userRef.update({
-        [`currentMonth.minutes`]: FieldValue.increment(hasGenerated.audioLength / 60),
-        [`currentMonth.bytes`]: FieldValue.increment(a.content.length),
-        [`currentMonth.posts`]: FieldValue.increment(1),
-        [`currentMonth.fileBytes`]: FieldValue.increment(hasGenerated.fileSize),
-        [`currentMonth.cost`]: FieldValue.increment(ttsCost),
-      })
-      continue
-    }
-
-    const $ = cheerio.load(a.content)
-    const contentArray = textToArray(a, $.text())
-    const voices = getVoicesFor(a)
-    const fileprefix = `${user_id}-${a.bookmark_id}`
-    let concats: string[] = []
-
-    while (true) {
-      const voice = voices.shift()
-      if (!voice) {
-        console.error('Ran out of voices for article', a.title)
-        break;
+  
+      // FIXME later
+      if (deprecated.find(p => p.bookmarkId === a.bookmark_id.toString())) {
+        console.log(`Post ${a.title} already generated`)
+        return res('1');
       }
+  
+      const hasGenerated = await getExistingTTS(a.url)
+      if (hasGenerated) {
+        // Short-circuit. No need to regen.
+        console.log(`Short-circuit. Recycling TTS for ${a.title}`)
+        await saveGeneratedPost({
+          title: a.title,
+          bookmarkId: a.bookmark_id.toString(),
+          username: user_id.toString(),
+          timestamp: Date.now(),
+          url: a.url,
+          fileSize: hasGenerated.fileSize,
+          audioLength: hasGenerated.audioLength,
+          description: hasGenerated.description,
+          filepath: hasGenerated.cloudStorageTts
+        })
+  
+        // Update /billing
+        const date = new Date()
+        const dateKey = `${(date.getMonth() + 1).toString()}-${date.getFullYear()}`
+        const billingAccount = await db.collection('billing').doc(user_id.toString()).get()
+        const ttsCost = calculateCost(a.content.length, hasGenerated.fileSize)
+        if (billingAccount.exists) {
+          await billingAccount.ref.update({
+            [`history.${dateKey}.minutes`]: FieldValue.increment(hasGenerated.audioLength / 60),
+            [`history.${dateKey}.bytes`]: FieldValue.increment(a.content.length),
+            [`history.${dateKey}.posts`]: FieldValue.increment(1),
+            [`history.${dateKey}.fileBytes`]: FieldValue.increment(hasGenerated.fileSize),
+            [`history.${dateKey}.cost`]: FieldValue.increment(ttsCost),
+          })
+        } else {
+          await billingAccount.ref.set({
+            history: {
+              [dateKey]: {
+                minutes: hasGenerated.audioLength / 60,
+                bytes: a.content.length,
+                posts: 1,
+                fileBytes: hasGenerated.fileSize,
+                cost: calculateCost(a.content.length, hasGenerated.fileSize),
+              } as Bill
+            }
+          })
+        }
+        // Update current month for /user
+        console.log(`Update userRef.currentMonth`)
+        await userRef.update({
+          [`currentMonth.minutes`]: FieldValue.increment(hasGenerated.audioLength / 60),
+          [`currentMonth.bytes`]: FieldValue.increment(a.content.length),
+          [`currentMonth.posts`]: FieldValue.increment(1),
+          [`currentMonth.fileBytes`]: FieldValue.increment(hasGenerated.fileSize),
+          [`currentMonth.cost`]: FieldValue.increment(ttsCost),
+        })
+        return res('1');
+      }
+  
+      const $ = cheerio.load(a.content)
+      const contentArray = textToArray(a, $.text())
+      const voices = getVoicesFor(a)
+      const fileprefix = `${user_id}-${a.bookmark_id}`
+      let concats: string[] = []
+  
+      while (true) {
+        const voice = voices.shift()
+        if (!voice) {
+          console.error('Ran out of voices for article', a.title)
+          break;
+        }
+        try {
+          concats = await generateArrayOfTts(voice, fileprefix, contentArray)
+          break; // Break if successful
+        } catch (e) {
+          console.error('TTS Error', e)
+          // We did not succeed on the first voice.
+          // Try the next voice and loop.
+          // ie. "sentences that are too long"
+        }
+      }
+      
       try {
-        concats = await generateArrayOfTts(voice, fileprefix, contentArray)
-        break; // Break if successful
+        const finalName = `${fileprefix}.mp3`
+        await concatTTSPieces(bucket, [...concats], `${finalName}`)
+        console.log('TTS Generation done... save post')
+  
+        const finalFile = path.join(os.tmpdir(), finalName)
+  
+        const buffer = fs.readFileSync(finalFile)
+        const stats = fs.statSync(finalFile)
+        const duration = await getAudioDurationInSeconds(finalFile)
+        await storeInCloud(bucket, finalName, buffer)
+  
+        await saveGeneratedPost({
+          title: a.title,
+          bookmarkId: a.bookmark_id.toString(),
+          username: user_id.toString(),
+          timestamp: Date.now(),
+          url: a.url,
+          fileSize: stats.size,
+          audioLength: duration,
+          description: contentArray[0],
+          filepath: finalName,
+        })
+  
+        // Normalize DB ops
+        // Update /syncInstapaper
+        const ipPosts = await db.collection('syncInstapaper')
+          .doc(user_id.toString()) // TODO: Make this the UID at some point
+          .get()
+        if (ipPosts.exists) {
+          // Eventually we'll need to prune this
+          await ipPosts.ref.update({
+            [`posts.${a.bookmark_id.toString()}`]: Date.now(),
+          })
+        } else {
+          await ipPosts.ref.set({
+            posts: {
+              [a.bookmark_id.toString()]: Date.now(),
+            }
+          })
+        }
+  
+        // Update /generated
+        await addExistingTTS(a.url, {
+          cloudStorageTts: finalName,
+          fileSize: stats.size,
+          audioLength: duration,
+          description: contentArray[0],
+        })
+  
+        // Update /billing
+        const date = new Date()
+        const dateKey = `${(date.getMonth() + 1).toString()}-${date.getFullYear()}`
+        const billingAccount = await db.collection('billing').doc(user_id.toString()).get()
+        const ttsCost = calculateCost(a.content.length, stats.size)
+        if (billingAccount.exists) {
+          console.log(`Update billing for ${user_id}: ${calculateCost(a.content.length, stats.size)}`)
+          await billingAccount.ref.update({
+            [`history.${dateKey}.minutes`]: FieldValue.increment(duration / 60),
+            [`history.${dateKey}.bytes`]: FieldValue.increment(a.content.length),
+            [`history.${dateKey}.posts`]: FieldValue.increment(1),
+            [`history.${dateKey}.fileBytes`]: FieldValue.increment(stats.size),
+            [`history.${dateKey}.cost`]: FieldValue.increment(ttsCost),
+          })
+        } else {
+          console.warn(`User ${user_id} has no billing account`)
+          await billingAccount.ref.set({
+            history: {
+              [dateKey]: {
+                minutes: duration / 60,
+                bytes: a.content.length,
+                posts: 1,
+                fileBytes: stats.size,
+                cost: calculateCost(a.content.length, stats.size),
+              } as Bill
+            }
+          })
+        }
+  
+        // Update current month for /user
+        console.log(`Update userRef.currentMonth`)
+        await userRef.update({
+          [`currentMonth.minutes`]: FieldValue.increment(duration / 60),
+          [`currentMonth.bytes`]: FieldValue.increment(a.content.length),
+          [`currentMonth.posts`]: FieldValue.increment(1),
+          [`currentMonth.fileBytes`]: FieldValue.increment(stats.size),
+          [`currentMonth.cost`]: FieldValue.increment(ttsCost),
+        })
       } catch (e) {
-        console.error('TTS Error', e)
-        // We did not succeed on the first voice.
-        // Try the next voice and loop.
-        // ie. "sentences that are too long"
-      }
-    }
-    
-    try {
-      const finalName = `${fileprefix}.mp3`
-      await concatTTSPieces(bucket, [...concats], `${finalName}`)
-      console.log('TTS Generation done... save post')
-
-      const finalFile = path.join(os.tmpdir(), finalName)
-
-      const buffer = fs.readFileSync(finalFile)
-      const stats = fs.statSync(finalFile)
-      const duration = await getAudioDurationInSeconds(finalFile)
-      await storeInCloud(bucket, finalName, buffer)
-
-      await saveGeneratedPost({
-        title: a.title,
-        bookmarkId: a.bookmark_id.toString(),
-        username: user_id.toString(),
-        timestamp: Date.now(),
-        url: a.url,
-        fileSize: stats.size,
-        audioLength: duration,
-        description: contentArray[0],
-        filepath: finalName,
-      })
-
-      // Normalize DB ops
-      // Update /syncInstapaper
-      const ipPosts = await db.collection('syncInstapaper')
-        .doc(user_id.toString()) // TODO: Make this the UID at some point
-        .get()
-      if (ipPosts.exists) {
-        // Eventually we'll need to prune this
-        await ipPosts.ref.update({
-          [`posts.${a.bookmark_id.toString()}`]: Date.now(),
-        })
-      } else {
-        await ipPosts.ref.set({
-          posts: {
-            [a.bookmark_id.toString()]: Date.now(),
-          }
-        })
+        console.error(a.bookmark_id, a.title)
+        console.error('Mix Error', e)
       }
 
-      // Update /generated
-      await addExistingTTS(a.url, {
-        cloudStorageTts: finalName,
-        fileSize: stats.size,
-        audioLength: duration,
-        description: contentArray[0],
-      })
-
-      // Update /billing
-      const date = new Date()
-      const dateKey = `${(date.getMonth() + 1).toString()}-${date.getFullYear()}`
-      const billingAccount = await db.collection('billing').doc(user_id.toString()).get()
-      const ttsCost = calculateCost(a.content.length, stats.size)
-      if (billingAccount.exists) {
-        console.log(`Update billing for ${user_id}: ${calculateCost(a.content.length, stats.size)}`)
-        await billingAccount.ref.update({
-          [`history.${dateKey}.minutes`]: FieldValue.increment(duration / 60),
-          [`history.${dateKey}.bytes`]: FieldValue.increment(a.content.length),
-          [`history.${dateKey}.posts`]: FieldValue.increment(1),
-          [`history.${dateKey}.fileBytes`]: FieldValue.increment(stats.size),
-          [`history.${dateKey}.cost`]: FieldValue.increment(ttsCost),
-        })
-      } else {
-        console.warn(`User ${user_id} has no billing account`)
-        await billingAccount.ref.set({
-          history: {
-            [dateKey]: {
-              minutes: duration / 60,
-              bytes: a.content.length,
-              posts: 1,
-              fileBytes: stats.size,
-              cost: calculateCost(a.content.length, stats.size),
-            } as Bill
-          }
-        })
-      }
-
-      // Update current month for /user
-      console.log(`Update userRef.currentMonth`)
-      await userRef.update({
-        [`currentMonth.minutes`]: FieldValue.increment(duration / 60),
-        [`currentMonth.bytes`]: FieldValue.increment(a.content.length),
-        [`currentMonth.posts`]: FieldValue.increment(1),
-        [`currentMonth.fileBytes`]: FieldValue.increment(stats.size),
-        [`currentMonth.cost`]: FieldValue.increment(ttsCost),
-      })
-    } catch (e) {
-      console.error(a.bookmark_id, a.title)
-      console.error('Mix Error', e)
-    }
+      return res('2');
+    }))
   }
-  return Promise.resolve('0')
+  return Promise.allSettled(articlePromises)
 }
 
 type IterativeCallback = (id: string, user: User, ref: FirebaseFirestore.DocumentReference) => void
@@ -384,6 +389,22 @@ export const instapaperTts = functions.runWith({
         }
       }
     })
+    // const promises = []
+    // forEveryUser(async (id, user, ref) => {
+    //   if (user.budget.bytes && user.budget.bytes <= user.currentMonth.bytes) return 1
+    //   if (user.budget.minutes && user.budget.minutes <= user.currentMonth.minutes) return 1
+    //   if (user.budget.posts && user.budget.posts <= user.currentMonth.posts) return 1
+    //   if (user.budget.cost && user.budget.cost <= user.currentMonth.cost) return 1
+    //   if (user.idInstapaper) {
+    //     try {
+    //       promises.push(convertInstapaperToMp3(id, user.idInstapaper, ref))
+    //     } catch (e) {
+    //       console.error(e)
+    //     }
+    //   }
+    //   return 0
+    // })
+    // await Promise.allSettled(promises)
 });
 
 interface SaveAuthRequest {
@@ -422,7 +443,7 @@ export const podcast = functions.https.onRequest(async (req, res) => {
   if (!posts.length) {
     res.status(404).send('Podcast by this ID does not exist')
   }
-  const ipIcon = `https://i.imgur.com/6ARxPBS.png`
+  const ipIcon = `https://storage.googleapis.com/evening-discourse/evening-discourse-logo.png`
   const feed: PodcastFeed2 = {
     icon: ipIcon,
     lastBuildDate: new Date(),
