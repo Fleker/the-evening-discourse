@@ -1,0 +1,142 @@
+<div *ngIf="!user" class="cold">
+  <img src="assets/evening-discourse-logo.png" />
+  <h1>Log into Evening Discourse</h1>
+  <button (click)="doAuth()">
+    Sign In with Google
+  </button>
+</div>
+
+<main *ngIf="user">
+  <div class="center">
+    <img src="assets/evening-discourse-logo.png" />
+    <h1>Your Evening Discourse</h1>
+  </div>
+
+  <div>
+    <strong>Your custom podcast feed:</strong>
+    <br>
+    <a href="{{podcastUrl}}">{{podcastUrl}}</a>
+    <br>
+    <small>
+      Copy and paste that into any podcast app.
+      Episodes will start appearing!
+    </small>
+  </div>
+
+  <div>
+    <h2>Connected Services</h2>
+    <h3>Your Services</h3>
+    <ul>
+      <li *ngFor="let s of connectedServices">
+        <button>
+          <span>Linked:</span>
+          {{s}}
+        </button>
+      </li>
+    </ul>
+
+    <h3>Available Services</h3>
+    <ul>
+      <li *ngFor="let s of unconnectedServices">
+        <button>
+          <span>Connect to </span>
+          {{s}}
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <h2>Your Budget</h2>
+    <span>
+      When more posts are enqueued than your budget allows, the system will stop
+      generating episodes and you won't be billed any more.
+    </span>
+    <br><br>
+    <table>
+      <tr>
+        <td>
+          Number of Posts:
+        </td>
+        <td>
+          <input type="number" placeholder="Number of Posts" [(ngModel)]="budget.posts" (input)="updateBudget()" />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Number of Minutes
+        </td>
+        <td>
+          <input type="number" placeholder="Number of Minutes" [(ngModel)]="budget.minutes" (input)="updateBudget()" />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Total size in Bytes
+        </td>
+        <td>
+          <input type="number" placeholder="Total size in Bytes" [(ngModel)]="budget.bytes" (input)="updateBudget()" />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Total Monthly cost
+        </td>
+        <td>
+          <input type="number" placeholder="Total cost" [(ngModel)]="budget.cost" (input)="updateBudget()" />
+        </td>
+      </tr>
+    </table>
+
+    <h2>
+      Your Payments
+    </h2>
+    <h3>Payment Settings</h3>
+    TODO: Stripe
+
+    <h3>Payment History</h3>
+    <strong>This Month</strong>
+    <table>
+      <tr>
+        <td>
+          Number of Posts:
+        </td>
+        <td>
+          {{currentMonth.posts | number: '1.0-0'}}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Number of Minutes
+        </td>
+        <td>
+          {{currentMonth.minutes | number: '1.0-0'}}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Total size in Bytes
+        </td>
+        <td>
+          {{currentMonth.bytes | number: '1.0-0'}}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Monthly cost up til now
+        </td>
+        <td>
+          {{currentMonth.cost | currency:'USD':true: '1.0-2'}}
+        </td>
+      </tr>
+    </table>
+
+    <br><br>
+    <strong>Past Months</strong>
+    <ul>
+      <li *ngFor="let bills of billingHistory">
+        {{bills[0]}} - {{bills[1].cost | currency:'USD':true: '1.0-2'}}
+      </li>
+    </ul>
+  </div>
+</main>

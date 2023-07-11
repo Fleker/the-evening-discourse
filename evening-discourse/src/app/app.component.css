@@ -1,0 +1,75 @@
+.cold img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  text-align: center;
+}
+
+button {
+  background-color: black;
+  color: white;
+  border: solid 1px orange;
+  border-radius: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  transition: all 250ms;
+}
+
+.cold button {
+  font-size: 24px;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+button:hover {
+  background-color: orangered;
+}
+
+button:active {
+  background-color: red;
+}
+
+main .center {
+  text-align: center;
+  max-width: 100vw;
+}
+
+main div {
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 40em;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+main img {
+  display: inline-block;
+  height: 40px;
+  padding-right: 16px;
+  vertical-align: middle;
+}
+
+main h1 {
+  display: inline-block;
+}
+
+main h1, main h2, main h3 {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+main button {
+  text-align: left;
+  display: inline-block;
+}
+
+main div a {
+  font-size: small;
+  color: lightblue;
+}
