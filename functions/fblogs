@@ -1,0 +1,96 @@
+[2023-04-05T01:02:36.771Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[2023-04-05T01:02:36.772Z] > authorizing via signed-in user (handnf@gmail.com)
+[2023-04-05T01:02:36.772Z] [iam] checking project evening-discourse for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[2023-04-05T01:02:36.774Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions [none]
+[2023-04-05T01:02:36.775Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions x-goog-quota-user=projects/evening-discourse
+[2023-04-05T01:02:36.776Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[2023-04-05T01:02:37.236Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions 200
+[2023-04-05T01:02:37.237Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/evening-discourse:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[2023-04-05T01:02:37.238Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/evening-discourse/serviceAccounts/evening-discourse@appspot.gserviceaccount.com:testIamPermissions [none]
+[2023-04-05T01:02:37.238Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/evening-discourse/serviceAccounts/evening-discourse@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[2023-04-05T01:02:37.774Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/evening-discourse/serviceAccounts/evening-discourse@appspot.gserviceaccount.com:testIamPermissions 200
+[2023-04-05T01:02:37.775Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/evening-discourse/serviceAccounts/evening-discourse@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+
+=== Deploying to 'evening-discourse'...
+
+i  deploying functions 
+Running command: npm --prefix "$RESOURCE_DIR" run build
+
+> build
+> tsc
+
+✔  functions: Finished running predeploy script. 
+[2023-04-05T01:02:51.676Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/evening-discourse [none]
+[2023-04-05T01:02:51.978Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/evening-discourse 200
+[2023-04-05T01:02:51.979Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/evening-discourse {"projectId":"evening-discourse","projectNumber":"4250095023","displayName":"evening-discourse","name":"projects/evening-discourse","resources":{"hostingSite":"evening-discourse"},"state":"ACTIVE","etag":"1_2eb1ee4b-069c-4171-b34b-65b8d22a4842"}
+i  functions: preparing codebase default for deployment 
+i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[2023-04-05T01:02:51.982Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/cloudfunctions.googleapis.com [none]
+[2023-04-05T01:02:51.983Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/evening-discourse
+[2023-04-05T01:02:51.984Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/runtimeconfig.googleapis.com [none]
+[2023-04-05T01:02:51.985Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/evening-discourse
+[2023-04-05T01:02:51.986Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/cloudbuild.googleapis.com [none]
+[2023-04-05T01:02:51.986Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/cloudbuild.googleapis.com x-goog-quota-user=projects/evening-discourse
+[2023-04-05T01:02:51.987Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/artifactregistry.googleapis.com [none]
+[2023-04-05T01:02:51.988Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/artifactregistry.googleapis.com x-goog-quota-user=projects/evening-discourse
+[2023-04-05T01:02:52.305Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/cloudbuild.googleapis.com 200
+[2023-04-05T01:02:52.306Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/cloudbuild.googleapis.com [omitted]
+✔  functions: required API cloudbuild.googleapis.com is enabled 
+[2023-04-05T01:02:52.307Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/artifactregistry.googleapis.com 200
+[2023-04-05T01:02:52.308Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/artifactregistry.googleapis.com [omitted]
+✔  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[2023-04-05T01:02:52.377Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/cloudfunctions.googleapis.com 200
+[2023-04-05T01:02:52.378Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/cloudfunctions.googleapis.com [omitted]
+✔  functions: required API cloudfunctions.googleapis.com is enabled 
+[2023-04-05T01:02:52.390Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/runtimeconfig.googleapis.com 200
+[2023-04-05T01:02:52.391Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/evening-discourse/services/runtimeconfig.googleapis.com [omitted]
+[2023-04-05T01:02:52.392Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/evening-discourse/adminSdkConfig [none]
+[2023-04-05T01:02:52.631Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/evening-discourse/adminSdkConfig 200
+[2023-04-05T01:02:52.631Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/evening-discourse/adminSdkConfig {"projectId":"evening-discourse","storageBucket":"evening-discourse.appspot.com"}
+[2023-04-05T01:02:52.632Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/evening-discourse/configs [none]
+[2023-04-05T01:02:52.926Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/evening-discourse/configs 200
+[2023-04-05T01:02:52.927Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/evening-discourse/configs {}
+[2023-04-05T01:02:52.933Z] Validating nodejs source
+[2023-04-05T01:02:53.460Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "lib/functions/src/index.js",
+  "dependencies": {
+    "@fleker/standard-feeds": "^1.2.2",
+    "@google-cloud/text-to-speech": "^4.2.1",
+    "cheerio": "^1.0.0-rc.12",
+    "firebase-admin": "^11.5.0",
+    "firebase-functions": "^4.2.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "get-audio-duration": "^3.1.1",
+    "instapaper": "^1.1.0",
+    "instapaper-node-sdk": "^2.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.0",
+    "firebase-functions-test": "^3.0.0"
+  },
+  "private": true
+}
+[2023-04-05T01:02:53.464Z] Building nodejs source
+[2023-04-05T01:02:53.467Z] Could not find functions.yaml. Must use http discovery
+[2023-04-05T01:02:53.497Z] Found firebase-functions binary at '/mnt/c/Users/Nick/Development/evening-discourse/functions/node_modules/.bin/firebase-functions'
+[2023-04-05T01:02:56.364Z] Serving at port 8782
+
+[2023-04-05T01:03:24.391Z] shutdown requested via /__/quitquitquit
+
+
+Error: User code failed to load. Cannot determine backend specification
